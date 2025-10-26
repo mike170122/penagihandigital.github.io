@@ -136,8 +136,6 @@
                     Belum punya akun? 
                     <button type="button" onclick="showRegister()" class="text-indigo-600 hover:text-indigo-500 font-medium">Daftar di sini</button>
                 </p>
-                
-
             </form>
         </div>
     </div>
@@ -549,8 +547,8 @@
     </div>
 
     <!-- Add/Edit Form Modal -->
-    <div id="formModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-xl shadow-xl max-w-md w-full mx-4">
+    <div id="formModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-xl max-w-md w-full my-8 max-h-full overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 id="formTitle" class="text-xl font-bold text-gray-900">Tambah Tagihan</h3>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition duration-200">
@@ -1227,35 +1225,35 @@
                 // Build action buttons based on permissions
                 let actionButtons = '';
                 if (canEdit) {
-                    actionButtons += `<button onclick="editBill(${bill.id})" class="text-indigo-600 hover:text-indigo-900 mr-3" title="Edit">
-                        <i class="fas fa-edit"></i>
+                    actionButtons += `<button onclick="editBill(${bill.id})" class="text-indigo-600 hover:text-indigo-900 mr-2 md:mr-3 p-1" title="Edit">
+                        <i class="fas fa-edit text-sm"></i>
                     </button>`;
                 }
                 if (canDelete) {
-                    actionButtons += `<button onclick="deleteBill(${bill.id})" class="text-red-600 hover:text-red-900" title="Hapus">
-                        <i class="fas fa-trash"></i>
+                    actionButtons += `<button onclick="deleteBill(${bill.id})" class="text-red-600 hover:text-red-900 p-1" title="Hapus">
+                        <i class="fas fa-trash text-sm"></i>
                     </button>`;
                 }
                 if (!canEdit && !canDelete) {
-                    actionButtons = '<span class="text-gray-400 text-sm">Hanya Lihat</span>';
+                    actionButtons = '<span class="text-gray-400 text-xs">Hanya Lihat</span>';
                 }
                 
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${bill.invoiceNumber}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${bill.customerName}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(bill.date).toLocaleDateString('id-ID')}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(bill.amount)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${bill.invoiceNumber}</td>
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${bill.customerName}</td>
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${new Date(bill.date).toLocaleDateString('id-ID')}</td>
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${formatCurrency(bill.amount)}</td>
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                         <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.paymentMethod === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
                             ${bill.paymentMethod === 'transfer' ? 'Transfer' : 'Tunai'}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                         <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
                             ${bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm font-medium">
                         ${actionButtons}
                     </td>
                 `;
@@ -1930,56 +1928,6 @@ ${bills.map((bill, index) =>
             });
         }
 
-        // Update renderTable function for mobile responsiveness
-        function renderTable() {
-            const tbody = document.getElementById('billsTableBody');
-            tbody.innerHTML = '';
-
-            bills.forEach(bill => {
-                const row = document.createElement('tr');
-                const isAdmin = currentUser && currentUser.role === 'admin';
-                const canEdit = checkPermission('edit');
-                const canDelete = checkPermission('delete');
-                
-                // Build action buttons based on permissions
-                let actionButtons = '';
-                if (canEdit) {
-                    actionButtons += `<button onclick="editBill(${bill.id})" class="text-indigo-600 hover:text-indigo-900 mr-2 md:mr-3 p-1" title="Edit">
-                        <i class="fas fa-edit text-sm"></i>
-                    </button>`;
-                }
-                if (canDelete) {
-                    actionButtons += `<button onclick="deleteBill(${bill.id})" class="text-red-600 hover:text-red-900 p-1" title="Hapus">
-                        <i class="fas fa-trash text-sm"></i>
-                    </button>`;
-                }
-                if (!canEdit && !canDelete) {
-                    actionButtons = '<span class="text-gray-400 text-xs">Hanya Lihat</span>';
-                }
-                
-                row.innerHTML = `
-                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${bill.invoiceNumber}</td>
-                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${bill.customerName}</td>
-                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${new Date(bill.date).toLocaleDateString('id-ID')}</td>
-                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${formatCurrency(bill.amount)}</td>
-                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.paymentMethod === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
-                            ${bill.paymentMethod === 'transfer' ? 'Transfer' : 'Tunai'}
-                        </span>
-                    </td>
-                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                            ${bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'}
-                        </span>
-                    </td>
-                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm font-medium">
-                        ${actionButtons}
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
         // Initialize
         updateStats();
         renderTable();
@@ -2005,5 +1953,5 @@ ${bills.map((bill, index) =>
             loadRememberedCredentials();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a657b728c3fd0',t:'MTc2MTQ4NjM1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a748965889fbc',t:'MTc2MTQ4Njk2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
