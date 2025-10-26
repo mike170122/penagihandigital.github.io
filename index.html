@@ -34,6 +34,7 @@
                 transform: translateX(-100%);
                 transition: transform 0.3s ease-in-out;
                 position: fixed;
+                left: 0;
                 z-index: 40;
                 height: 100%;
             }
@@ -41,7 +42,7 @@
                 transform: translateX(0);
             }
             .main-content {
-                margin-left: 0 !important;
+                margin-right: 0 !important;
                 width: 100% !important;
             }
             .mobile-overlay {
@@ -74,6 +75,9 @@
             .sidebar {
                 position: relative;
                 transform: translateX(0);
+            }
+            .main-content {
+                margin-right: 0;
             }
         }
         
@@ -170,11 +174,14 @@
     <!-- Dashboard -->
     <div id="dashboard" class="hidden dashboard-container flex">
         <!-- Sidebar -->
-        <div id="sidebar" class="sidebar w-64 bg-gray-900 text-white flex-shrink-0">
-            <div class="p-6">
-                <div class="flex items-center mb-8">
-                    <i class="fas fa-file-invoice-dollar text-2xl text-indigo-400 mr-3"></i>
-                    <h1 class="text-xl font-bold">Rekap Penagihan</h1>
+        <div id="sidebar" class="sidebar w-64 bg-gray-900 text-white flex-shrink-0 flex flex-col">
+            <div class="flex-1 p-6">
+                <div class="mb-8">
+                    <p class="text-sm text-gray-400 mb-2" id="sidebarWelcome">Selamat datang, Admin</p>
+                    <div class="flex items-center">
+                        <i class="fas fa-file-invoice-dollar text-2xl text-indigo-400 mr-3"></i>
+                        <h1 class="text-xl font-bold">Rekap Penagihan</h1>
+                    </div>
                 </div>
                 
                 <nav class="space-y-2">
@@ -205,7 +212,8 @@
                 </nav>
             </div>
             
-            <div class="absolute bottom-0 w-64 p-6 border-t border-gray-700">
+            <!-- User info and logout at bottom -->
+            <div class="p-6 border-t border-gray-700 mt-auto">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-user text-white"></i>
@@ -234,12 +242,11 @@
                             <h2 id="pageTitle" class="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h2>
                         </div>
                         <div class="flex items-center space-x-2 md:space-x-4">
-                            <div class="hidden md:flex items-center space-x-2">
+                            <div class="flex items-center space-x-2">
                                 <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                                <span class="text-sm text-green-600 font-medium">Sistem Online</span>
-                                <span class="text-xs text-gray-500">(08:00 - 23:00 WIB)</span>
+                                <span class="text-sm text-green-600 font-medium">Online</span>
+                                <span class="text-sm text-gray-600 font-mono" id="currentTimeDisplay">00:00:00</span>
                             </div>
-                            <span class="text-sm md:text-base text-gray-700" id="userWelcome">Selamat datang, Admin</span>
                         </div>
                     </div>
                 </div>
@@ -250,50 +257,83 @@
                 <!-- Dashboard Content -->
                 <div id="dashboardContent">
                     <!-- Stats Cards -->
-                    <div class="stats-grid grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-                        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                             <div class="flex items-center">
-                                <div class="p-2 md:p-3 bg-blue-100 rounded-lg">
-                                    <i class="fas fa-file-invoice text-blue-600 text-lg md:text-xl"></i>
+                                <div class="p-3 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-file-invoice text-blue-600 text-2xl"></i>
                                 </div>
-                                <div class="ml-3 md:ml-4">
-                                    <p class="text-xs md:text-sm text-gray-600">Total Tagihan</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-900" id="totalBills">0</p>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-600 font-medium">Total Tagihan</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="totalBills">0</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                             <div class="flex items-center">
-                                <div class="p-2 md:p-3 bg-green-100 rounded-lg">
-                                    <i class="fas fa-check-circle text-green-600 text-lg md:text-xl"></i>
+                                <div class="p-3 bg-green-100 rounded-lg">
+                                    <i class="fas fa-check-circle text-green-600 text-2xl"></i>
                                 </div>
-                                <div class="ml-3 md:ml-4">
-                                    <p class="text-xs md:text-sm text-gray-600">Lunas</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-900" id="paidBills">0</p>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-600 font-medium">Lunas</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="paidBills">0</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                             <div class="flex items-center">
-                                <div class="p-2 md:p-3 bg-yellow-100 rounded-lg">
-                                    <i class="fas fa-clock text-yellow-600 text-lg md:text-xl"></i>
+                                <div class="p-3 bg-yellow-100 rounded-lg">
+                                    <i class="fas fa-clock text-yellow-600 text-2xl"></i>
                                 </div>
-                                <div class="ml-3 md:ml-4">
-                                    <p class="text-xs md:text-sm text-gray-600">Belum Lunas</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-900" id="pendingBills">0</p>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-600 font-medium">Belum Lunas</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="pendingBills">0</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                             <div class="flex items-center">
-                                <div class="p-2 md:p-3 bg-indigo-100 rounded-lg">
-                                    <i class="fas fa-dollar-sign text-indigo-600 text-lg md:text-xl"></i>
+                                <div class="p-3 bg-indigo-100 rounded-lg">
+                                    <i class="fas fa-dollar-sign text-indigo-600 text-2xl"></i>
                                 </div>
-                                <div class="ml-3 md:ml-4">
-                                    <p class="text-xs md:text-sm text-gray-600">Total Nilai</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-900" id="totalAmount">Rp 0</p>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-600 font-medium">Total Nilai</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="totalAmount">Rp 0</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Access to Reports (Admin Only) -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8" id="dashboardReportsSection">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-chart-bar text-indigo-500 mr-3"></i>
+                            Akses Cepat Laporan
+                        </h3>
+                        <div class="flex justify-center">
+                            <button onclick="showReports()" class="flex flex-col items-center p-6 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors duration-200 group">
+                                <div class="w-16 h-16 bg-indigo-500 rounded-lg flex items-center justify-center mb-4 group-hover:bg-indigo-600 transition-colors duration-200">
+                                    <i class="fas fa-chart-bar text-white text-2xl"></i>
+                                </div>
+                                <span class="text-lg font-medium text-gray-700 text-center">Lihat Laporan Lengkap</span>
+                                <span class="text-sm text-gray-500 text-center mt-1">Analisis data dan statistik</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-history text-blue-500 mr-3"></i>
+                            Aktivitas Terbaru
+                        </h3>
+                        <div id="recentActivity" class="space-y-4">
+                            <!-- Recent activity will be populated here -->
+                        </div>
+                        <div class="mt-6 text-center">
+                            <button onclick="showBills()" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                                Lihat Semua Data →
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -322,6 +362,7 @@
                                         <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
                                         <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                                         <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                                        <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
                                         <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                     </tr>
@@ -538,6 +579,13 @@
                         <input type="number" id="amount" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     </div>
                     <div>
+                        <label for="paymentMethod" class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran</label>
+                        <select id="paymentMethod" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="tunai">Tunai</option>
+                            <option value="transfer">Transfer</option>
+                        </select>
+                    </div>
+                    <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                         <select id="status" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                             <option value="pending">Belum Lunas</option>
@@ -590,7 +638,8 @@
                 customerName: 'PT. Maju Jaya',
                 date: '2024-01-15',
                 amount: 5000000,
-                status: 'paid'
+                status: 'paid',
+                paymentMethod: 'transfer'
             },
             {
                 id: 2,
@@ -598,7 +647,8 @@
                 customerName: 'CV. Berkah Sejahtera',
                 date: '2024-01-20',
                 amount: 3500000,
-                status: 'pending'
+                status: 'pending',
+                paymentMethod: 'tunai'
             }
         ];
 
@@ -623,23 +673,45 @@
 
         function updateCurrentTime() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString('id-ID', {
+            
+            // Format untuk header (lengkap dengan hari/tanggal/jam/menit/detik WIT)
+            const headerTimeString = now.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                timeZone: 'Asia/Jayapura'
+            }) + ' ' + now.toLocaleTimeString('id-ID', {
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit',
-                timeZone: 'Asia/Jakarta'
-            });
-            const dateString = now.toLocaleDateString('id-ID', {
+                timeZone: 'Asia/Jayapura'
+            }) + ' WIT';
+            
+            // Format untuk offline notice (lebih detail)
+            const offlineTimeString = now.toLocaleDateString('id-ID', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
-                timeZone: 'Asia/Jakarta'
-            });
+                timeZone: 'Asia/Jayapura'
+            }) + ', ' + now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Jayapura'
+            }) + ' WIT';
             
+            // Update offline notice time
             const currentTimeElement = document.getElementById('currentTime');
             if (currentTimeElement) {
-                currentTimeElement.textContent = `${dateString}, ${timeString}`;
+                currentTimeElement.textContent = offlineTimeString;
+            }
+            
+            // Update header time display
+            const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+            if (currentTimeDisplay) {
+                currentTimeDisplay.textContent = headerTimeString;
             }
         }
 
@@ -704,11 +776,9 @@
                 checkSystemStatus();
             }, 30000);
             
-            // Update time display every second when offline
+            // Update time display every second
             setInterval(() => {
-                if (!isSystemOnline()) {
-                    updateCurrentTime();
-                }
+                updateCurrentTime();
             }, 1000);
         }
 
@@ -743,7 +813,7 @@
                     role: userAccounts[username].role
                 };
                 
-                document.getElementById('userWelcome').textContent = `Selamat datang, ${currentUser.name}`;
+                document.getElementById('sidebarWelcome').textContent = `Selamat datang, ${currentUser.name}`;
                 document.getElementById('sidebarUserName').textContent = currentUser.name;
                 
                 // Update role display in sidebar
@@ -774,17 +844,89 @@
             const reportsMenu = document.getElementById('menuReports');
             const userManagementMenu = document.getElementById('menuUserManagement');
             const settingsMenu = document.getElementById('menuSettings');
+            const dashboardReportsSection = document.getElementById('dashboardReportsSection');
             
             if (!isAdmin) {
                 // Hide admin-only menus for users
                 reportsMenu.style.display = 'none';
                 userManagementMenu.style.display = 'none';
                 settingsMenu.style.display = 'none';
+                if (dashboardReportsSection) dashboardReportsSection.style.display = 'none';
             } else {
                 // Show all menus for admin
                 reportsMenu.style.display = 'flex';
                 userManagementMenu.style.display = 'flex';
                 settingsMenu.style.display = 'flex';
+                if (dashboardReportsSection) dashboardReportsSection.style.display = 'block';
+            }
+        }
+
+        // Recent Activity Functions
+        function updateRecentActivity() {
+            const recentActivityContainer = document.getElementById('recentActivity');
+            
+            // Get last 5 bills sorted by date
+            const recentBills = bills
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+            
+            if (recentBills.length === 0) {
+                recentActivityContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-inbox text-gray-300 text-4xl mb-4"></i>
+                        <p class="text-gray-500">Belum ada aktivitas terbaru</p>
+                        <button onclick="showAddForm()" class="mt-3 text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            Tambah Tagihan Pertama →
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            recentActivityContainer.innerHTML = recentBills.map(bill => {
+                const timeAgo = getTimeAgo(bill.date);
+                const statusColor = bill.status === 'paid' ? 'text-green-600' : 'text-yellow-600';
+                const statusIcon = bill.status === 'paid' ? 'fa-check-circle' : 'fa-clock';
+                const statusText = bill.status === 'paid' ? 'Lunas' : 'Belum Lunas';
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas ${statusIcon} ${statusColor}"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">${bill.customerName}</p>
+                                <p class="text-sm text-gray-600">Petugas: ${bill.invoiceNumber} • ${formatCurrency(bill.amount)}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs ${statusColor} font-medium">${statusText}</span>
+                            <p class="text-xs text-gray-500 mt-1">${timeAgo}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffInMs = now - date;
+            const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+            
+            if (diffInDays === 0) {
+                return 'Hari ini';
+            } else if (diffInDays === 1) {
+                return 'Kemarin';
+            } else if (diffInDays < 7) {
+                return `${diffInDays} hari lalu`;
+            } else if (diffInDays < 30) {
+                const weeks = Math.floor(diffInDays / 7);
+                return `${weeks} minggu lalu`;
+            } else {
+                const months = Math.floor(diffInDays / 30);
+                return `${months} bulan lalu`;
             }
         }
 
@@ -944,6 +1086,7 @@
             document.getElementById('pageTitle').textContent = 'Dashboard';
             document.getElementById('dashboardContent').classList.remove('hidden');
             updateStats();
+            updateRecentActivity();
         }
 
         function showBills() {
@@ -1064,6 +1207,11 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(bill.date).toLocaleDateString('id-ID')}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(bill.amount)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.paymentMethod === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                            ${bill.paymentMethod === 'transfer' ? 'Transfer' : 'Tunai'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
                             ${bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'}
                         </span>
@@ -1093,6 +1241,7 @@
                 document.getElementById('customerName').value = bill.customerName;
                 document.getElementById('billDate').value = bill.date;
                 document.getElementById('amount').value = bill.amount;
+                document.getElementById('paymentMethod').value = bill.paymentMethod || 'tunai';
                 document.getElementById('status').value = bill.status;
                 document.getElementById('formModal').classList.remove('hidden');
                 document.getElementById('formModal').classList.add('flex');
@@ -1115,6 +1264,7 @@
                         bills = bills.filter(b => b.id !== id);
                         updateStats();
                         renderTable();
+                        updateRecentActivity();
                         showToast('Tagihan berhasil dihapus', 'success');
                     }
                 );
@@ -1134,6 +1284,7 @@
                 customerName: document.getElementById('customerName').value,
                 date: document.getElementById('billDate').value,
                 amount: parseInt(document.getElementById('amount').value),
+                paymentMethod: document.getElementById('paymentMethod').value,
                 status: document.getElementById('status').value
             };
 
@@ -1154,6 +1305,7 @@
 
             updateStats();
             renderTable();
+            updateRecentActivity();
             closeModal();
         }
 
@@ -1165,35 +1317,181 @@
             }
             
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF('landscape'); // Use landscape orientation for better table layout
 
-            doc.setFontSize(18);
-            doc.text('Laporan Rekap Penagihan', 20, 20);
+            // Header
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('LAPORAN REKAP PENAGIHAN DIGITAL', 20, 20);
             
-            doc.setFontSize(12);
-            doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 20, 35);
-            doc.text(`Total Tagihan: ${bills.length}`, 20, 45);
-            doc.text(`Total Nilai: ${formatCurrency(bills.reduce((sum, bill) => sum + bill.amount, 0))}`, 20, 55);
+            // Summary info
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            const totalAmount = bills.reduce((sum, bill) => sum + bill.amount, 0);
+            const paidBills = bills.filter(bill => bill.status === 'paid').length;
+            const pendingBills = bills.filter(bill => bill.status === 'pending').length;
+            
+            doc.text(`Tanggal Export: ${new Date().toLocaleDateString('id-ID', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })}`, 20, 35);
+            doc.text(`Diekspor oleh: ${currentUser.name}`, 20, 42);
+            doc.text(`Total Tagihan: ${bills.length} | Lunas: ${paidBills} | Belum Lunas: ${pendingBills} | Total Nilai: ${formatCurrency(totalAmount)}`, 20, 49);
 
-            let yPosition = 75;
-            doc.text('Nama Petugas', 20, yPosition);
-            doc.text('Pelanggan', 60, yPosition);
-            doc.text('Tanggal', 120, yPosition);
-            doc.text('Jumlah', 150, yPosition);
-            doc.text('Status', 180, yPosition);
+            // Table setup
+            const startY = 60;
+            const rowHeight = 8;
+            const pageHeight = doc.internal.pageSize.height;
+            const marginBottom = 20;
+            
+            // Column positions and widths (landscape: ~297mm width)
+            const columns = [
+                { header: 'No', x: 20, width: 12 },
+                { header: 'Nama Petugas', x: 32, width: 35 },
+                { header: 'Nama Pelanggan', x: 67, width: 50 },
+                { header: 'Tanggal', x: 117, width: 25 },
+                { header: 'Jumlah (Rp)', x: 142, width: 35 },
+                { header: 'Metode', x: 177, width: 25 },
+                { header: 'Status', x: 202, width: 25 }
+            ];
 
-            yPosition += 10;
-            bills.forEach(bill => {
-                doc.text(bill.invoiceNumber, 20, yPosition);
-                doc.text(bill.customerName.substring(0, 20), 60, yPosition);
-                doc.text(new Date(bill.date).toLocaleDateString('id-ID'), 120, yPosition);
-                doc.text(formatCurrency(bill.amount), 150, yPosition);
-                doc.text(bill.status === 'paid' ? 'Lunas' : 'Belum Lunas', 180, yPosition);
-                yPosition += 10;
+            let currentY = startY;
+            let pageNumber = 1;
+
+            // Function to draw table header
+            function drawTableHeader() {
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'bold');
+                
+                // Draw header background
+                doc.setFillColor(240, 240, 240);
+                doc.rect(20, currentY - 2, 215, rowHeight, 'F');
+                
+                // Draw header borders
+                doc.setDrawColor(0, 0, 0);
+                doc.rect(20, currentY - 2, 215, rowHeight);
+                
+                // Draw column separators
+                columns.forEach((col, index) => {
+                    if (index > 0) {
+                        doc.line(col.x, currentY - 2, col.x, currentY + rowHeight - 2);
+                    }
+                });
+                
+                // Header text
+                columns.forEach(col => {
+                    doc.text(col.header, col.x + 2, currentY + 3);
+                });
+                
+                currentY += rowHeight;
+            }
+
+            // Function to add new page
+            function addNewPage() {
+                doc.addPage('landscape');
+                pageNumber++;
+                currentY = 30;
+                
+                // Add page number
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Halaman ${pageNumber}`, 250, 15);
+                
+                drawTableHeader();
+            }
+
+            // Function to check if we need a new page
+            function checkNewPage() {
+                if (currentY + rowHeight > pageHeight - marginBottom) {
+                    addNewPage();
+                }
+            }
+
+            // Draw initial header
+            doc.setFontSize(8);
+            doc.text(`Halaman ${pageNumber}`, 250, 15);
+            drawTableHeader();
+
+            // Draw table rows
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+            
+            bills.forEach((bill, index) => {
+                checkNewPage();
+                
+                // Draw row background (alternating colors)
+                if (index % 2 === 0) {
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(20, currentY - 1, 215, rowHeight, 'F');
+                }
+                
+                // Draw row borders
+                doc.setDrawColor(200, 200, 200);
+                doc.rect(20, currentY - 1, 215, rowHeight);
+                
+                // Draw column separators
+                columns.forEach((col, colIndex) => {
+                    if (colIndex > 0) {
+                        doc.line(col.x, currentY - 1, col.x, currentY + rowHeight - 1);
+                    }
+                });
+                
+                // Row data
+                const rowData = [
+                    (index + 1).toString(),
+                    bill.invoiceNumber,
+                    bill.customerName.length > 20 ? bill.customerName.substring(0, 20) + '...' : bill.customerName,
+                    new Date(bill.date).toLocaleDateString('id-ID'),
+                    formatCurrency(bill.amount).replace('Rp', '').trim(),
+                    bill.paymentMethod === 'transfer' ? 'Transfer' : 'Tunai',
+                    bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'
+                ];
+                
+                // Draw text in each column
+                columns.forEach((col, colIndex) => {
+                    const text = rowData[colIndex];
+                    const textX = col.x + 2;
+                    const textY = currentY + 4;
+                    
+                    // Right align for amount column
+                    if (colIndex === 4) {
+                        const textWidth = doc.getTextWidth(text);
+                        doc.text(text, col.x + col.width - textWidth - 2, textY);
+                    } else {
+                        doc.text(text, textX, textY);
+                    }
+                });
+                
+                currentY += rowHeight;
             });
 
-            doc.save('rekap-penagihan.pdf');
-            showToast('PDF berhasil diunduh', 'success');
+            // Footer with summary
+            currentY += 10;
+            checkNewPage();
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('RINGKASAN:', 20, currentY);
+            currentY += 8;
+            
+            doc.setFont(undefined, 'normal');
+            doc.text(`Total Tagihan: ${bills.length}`, 20, currentY);
+            doc.text(`Tagihan Lunas: ${paidBills}`, 80, currentY);
+            doc.text(`Belum Lunas: ${pendingBills}`, 140, currentY);
+            currentY += 6;
+            doc.text(`Total Nilai Keseluruhan: ${formatCurrency(totalAmount)}`, 20, currentY);
+            
+            // Footer
+            currentY += 15;
+            doc.setFontSize(8);
+            doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')} oleh ${currentUser.name}`, 20, currentY);
+
+            // Save the PDF
+            const fileName = `rekap-penagihan-${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            showToast('PDF berhasil diunduh dengan format tabel lengkap!', 'success');
         }
 
         function exportExcel() {
@@ -1207,6 +1505,7 @@
                 'Pelanggan': bill.customerName,
                 'Tanggal': bill.date,
                 'Jumlah': bill.amount,
+                'Metode Pembayaran': bill.paymentMethod === 'transfer' ? 'Transfer' : 'Tunai',
                 'Status': bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'
             })));
 
@@ -1439,7 +1738,7 @@ Silakan kirim file JSON bersama pesan ini.
 
 📝 *Detail Tagihan:*
 ${bills.map((bill, index) => 
-`${index + 1}. ${bill.customerName} - ${formatCurrency(bill.amount)} (${bill.status === 'paid' ? '✅ Lunas' : '⏳ Belum Lunas'})`
+`${index + 1}. ${bill.customerName} - ${formatCurrency(bill.amount)} - ${bill.paymentMethod === 'transfer' ? '💳 Transfer' : '💵 Tunai'} (${bill.status === 'paid' ? '✅ Lunas' : '⏳ Belum Lunas'})`
 ).join('\n')}
 
 #SistemPenagihanDigital #Ringkasan`;
@@ -1491,6 +1790,7 @@ ${bills.map((bill, index) =>
                                 customerName: item.customerName || 'Unknown',
                                 date: item.date || new Date().toISOString().split('T')[0],
                                 amount: parseInt(item.amount) || 0,
+                                paymentMethod: item.paymentMethod || 'tunai',
                                 status: item.status || 'pending'
                             };
                             bills.push(newBill);
@@ -1498,6 +1798,7 @@ ${bills.map((bill, index) =>
                         
                         updateStats();
                         renderTable();
+                        updateRecentActivity();
                         showToast(`${billsToImport.length} data berhasil diimpor dari ${importInfo}`, 'success');
                         
                     } catch (error) {
@@ -1623,6 +1924,11 @@ ${bills.map((bill, index) =>
                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${new Date(bill.date).toLocaleDateString('id-ID')}</td>
                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">${formatCurrency(bill.amount)}</td>
                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.paymentMethod === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                            ${bill.paymentMethod === 'transfer' ? 'Transfer' : 'Tunai'}
+                        </span>
+                    </td>
+                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                         <span class="px-2 py-1 text-xs font-semibold rounded-full ${bill.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
                             ${bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'}
                         </span>
@@ -1638,6 +1944,7 @@ ${bills.map((bill, index) =>
         // Initialize
         updateStats();
         renderTable();
+        updateRecentActivity();
         
         // Start time monitoring when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -1656,5 +1963,5 @@ ${bills.map((bill, index) =>
             initializeMobileMenu();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a2a1b34a13d92',t:'MTc2MTQ4MzkxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a54e5f650efdf',t:'MTc2MTQ4NTY3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
