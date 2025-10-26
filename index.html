@@ -475,6 +475,33 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Data Management (Admin Only) -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200" id="dataManagementSection">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-database text-red-600 mr-2"></i>
+                                Kelola Data
+                            </h3>
+                            <p class="text-gray-600 mb-4">Kelola data yang tersimpan di browser</p>
+                            
+                            <div class="space-y-3">
+                                <button onclick="clearAllData()" class="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition duration-200 flex items-center justify-center">
+                                    <i class="fas fa-trash-alt mr-2"></i>Hapus Semua Data
+                                </button>
+                                <button onclick="resetToDemo()" class="w-full bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-700 transition duration-200 flex items-center justify-center">
+                                    <i class="fas fa-undo mr-2"></i>Reset ke Data Demo
+                                </button>
+                            </div>
+                            
+                            <div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                                <h4 class="text-sm font-semibold text-red-800 mb-2">⚠️ Peringatan:</h4>
+                                <ul class="text-xs text-red-700 space-y-1">
+                                    <li>• Hapus semua data akan menghapus seluruh tagihan</li>
+                                    <li>• Reset akan mengembalikan ke data contoh</li>
+                                    <li>• Aksi ini tidak dapat dibatalkan</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -799,43 +826,67 @@
         const ONLINE_START_HOUR = 8;  // 8 AM
         const ONLINE_END_HOUR = 23;   // 11 PM
         
-        // Sample data
-        let bills = [
-            {
-                id: 1,
-                invoiceNumber: 'Mario',
-                customerName: 'PT. Maju Jaya',
-                date: '2024-01-15',
-                amount: 5000000,
-                status: 'paid',
-                paymentMethod: 'transfer',
-                createdBy: 'admin',
-                createdAt: '2024-01-15T10:30:00.000Z',
-                updatedBy: 'admin',
-                updatedAt: '2024-01-15T10:30:00.000Z'
-            },
-            {
-                id: 2,
-                invoiceNumber: 'Macho',
-                customerName: 'CV. Berkah Sejahtera',
-                date: '2024-01-20',
-                amount: 3500000,
-                status: 'pending',
-                paymentMethod: 'tunai',
-                createdBy: 'mario',
-                createdAt: '2024-01-20T14:15:00.000Z',
-                updatedBy: 'mario',
-                updatedAt: '2024-01-20T14:15:00.000Z'
-            }
-        ];
+        // Initialize bills from localStorage or empty array
+        let bills = loadBillsFromStorage();
 
-        // User accounts with roles
-        const userAccounts = {
-            'admin': { password: 'admin123', role: 'admin', name: 'Administrator' },
-            'user1': { password: 'user123', role: 'user', name: 'User Biasa' },
-            'mario': { password: 'mario123', role: 'user', name: 'Mario' },
-            'macho': { password: 'macho123', role: 'user', name: 'Macho' }
-        };
+        // User accounts with roles - load from localStorage or use defaults
+        let userAccounts = loadUserAccountsFromStorage();
+
+        // Data persistence functions
+        function loadBillsFromStorage() {
+            try {
+                const savedBills = localStorage.getItem('billsData');
+                if (savedBills) {
+                    const parsedBills = JSON.parse(savedBills);
+                    console.log('Loaded bills from storage:', parsedBills.length, 'records');
+                    return parsedBills;
+                }
+            } catch (error) {
+                console.error('Error loading bills from storage:', error);
+            }
+            
+            // Return empty array if no saved data or error
+            console.log('No saved bills found, starting with empty data');
+            return [];
+        }
+
+        function saveBillsToStorage() {
+            try {
+                localStorage.setItem('billsData', JSON.stringify(bills));
+                console.log('Bills saved to storage:', bills.length, 'records');
+            } catch (error) {
+                console.error('Error saving bills to storage:', error);
+                showToast('Gagal menyimpan data ke penyimpanan lokal', 'error');
+            }
+        }
+
+        function loadUserAccountsFromStorage() {
+            try {
+                const savedAccounts = localStorage.getItem('userAccounts');
+                if (savedAccounts) {
+                    return JSON.parse(savedAccounts);
+                }
+            } catch (error) {
+                console.error('Error loading user accounts from storage:', error);
+            }
+            
+            // Return default accounts if no saved data
+            return {
+                'admin': { password: 'admin123', role: 'admin', name: 'Administrator' },
+                'user1': { password: 'user123', role: 'user', name: 'User Biasa' },
+                'mario': { password: 'mario123', role: 'user', name: 'Mario' },
+                'macho': { password: 'macho123', role: 'user', name: 'Macho' }
+            };
+        }
+
+        function saveUserAccountsToStorage() {
+            try {
+                localStorage.setItem('userAccounts', JSON.stringify(userAccounts));
+                console.log('User accounts saved to storage');
+            } catch (error) {
+                console.error('Error saving user accounts to storage:', error);
+            }
+        }
 
         let currentUser = null;
         let editingId = null;
@@ -1142,14 +1193,90 @@
         function applyExportImportRestrictions() {
             const isAdmin = currentUser && currentUser.role === 'admin';
             const importSection = document.getElementById('importSection');
+            const dataManagementSection = document.getElementById('dataManagementSection');
             
             if (!isAdmin) {
-                // Hide import section for users
+                // Hide admin-only sections for users
                 importSection.style.display = 'none';
+                dataManagementSection.style.display = 'none';
             } else {
-                // Show import section for admin
+                // Show admin sections for admin
                 importSection.style.display = 'block';
+                dataManagementSection.style.display = 'block';
             }
+        }
+
+        // Data management functions
+        function clearAllData() {
+            if (!checkPermission('delete')) {
+                showToast('Anda tidak memiliki izin untuk menghapus data', 'error');
+                return;
+            }
+            
+            showCustomConfirm(
+                'Hapus SEMUA data tagihan? Aksi ini tidak dapat dibatalkan!',
+                () => {
+                    bills = [];
+                    saveBillsToStorage();
+                    
+                    updateStats();
+                    renderTable();
+                    updateRecentActivity();
+                    updateExportStats();
+                    
+                    showToast('Semua data berhasil dihapus', 'success');
+                }
+            );
+        }
+
+        function resetToDemo() {
+            if (!checkPermission('delete')) {
+                showToast('Anda tidak memiliki izin untuk reset data', 'error');
+                return;
+            }
+            
+            showCustomConfirm(
+                'Reset ke data demo? Data saat ini akan dihapus dan diganti dengan contoh data.',
+                () => {
+                    bills = [
+                        {
+                            id: 1,
+                            invoiceNumber: 'Mario',
+                            customerName: 'PT. Maju Jaya',
+                            date: '2024-01-15',
+                            amount: 5000000,
+                            status: 'paid',
+                            paymentMethod: 'transfer',
+                            createdBy: 'admin',
+                            createdAt: '2024-01-15T10:30:00.000Z',
+                            updatedBy: 'admin',
+                            updatedAt: '2024-01-15T10:30:00.000Z'
+                        },
+                        {
+                            id: 2,
+                            invoiceNumber: 'Macho',
+                            customerName: 'CV. Berkah Sejahtera',
+                            date: '2024-01-20',
+                            amount: 3500000,
+                            status: 'pending',
+                            paymentMethod: 'tunai',
+                            createdBy: 'mario',
+                            createdAt: '2024-01-20T14:15:00.000Z',
+                            updatedBy: 'mario',
+                            updatedAt: '2024-01-20T14:15:00.000Z'
+                        }
+                    ];
+                    
+                    saveBillsToStorage();
+                    
+                    updateStats();
+                    renderTable();
+                    updateRecentActivity();
+                    updateExportStats();
+                    
+                    showToast('Data berhasil direset ke contoh demo', 'success');
+                }
+            );
         }
 
         function updateExportStats() {
@@ -1219,6 +1346,9 @@
                 name: name
             };
 
+            // Save to localStorage
+            saveUserAccountsToStorage();
+
             // Clear form
             document.getElementById('addUserForm').reset();
             
@@ -1239,6 +1369,10 @@
                 `Hapus user ${user.name} (@${username})?`,
                 () => {
                     delete userAccounts[username];
+                    
+                    // Save to localStorage
+                    saveUserAccountsToStorage();
+                    
                     renderUserList();
                     showToast(`User ${user.name} berhasil dihapus`, 'success');
                 }
@@ -1767,6 +1901,9 @@
                         bills = bills.filter(b => b.id !== id);
                         
                         if (bills.length < originalLength) {
+                            // Save to localStorage
+                            saveBillsToStorage();
+                            
                             updateStats();
                             renderTable();
                             updateRecentActivity();
@@ -1845,6 +1982,9 @@
                 showToast('Tagihan berhasil ditambahkan', 'success');
                 console.log('Added new bill:', newBill); // Debug log
             }
+
+            // Save to localStorage
+            saveBillsToStorage();
 
             // Reset editing state
             editingId = null;
@@ -2338,10 +2478,17 @@ ${bills.map((bill, index) =>
                                 date: item.date || new Date().toISOString().split('T')[0],
                                 amount: parseInt(item.amount) || 0,
                                 paymentMethod: item.paymentMethod || 'tunai',
-                                status: item.status || 'pending'
+                                status: item.status || 'pending',
+                                createdBy: item.createdBy || currentUser.username,
+                                createdAt: item.createdAt || new Date().toISOString(),
+                                updatedBy: item.updatedBy || currentUser.username,
+                                updatedAt: item.updatedAt || new Date().toISOString()
                             };
                             bills.push(newBill);
                         });
+                        
+                        // Save to localStorage
+                        saveBillsToStorage();
                         
                         updateStats();
                         renderTable();
@@ -2483,5 +2630,5 @@ ${bills.map((bill, index) =>
             loadRememberedCredentials();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a907ba4399fbc',t:'MTc2MTQ4ODExMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994aab7a20683fd0',t:'MTc2MTQ4OTIxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
