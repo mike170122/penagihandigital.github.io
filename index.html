@@ -123,6 +123,12 @@
                     <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
                     <input id="loginPassword" type="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="••••••••">
                 </div>
+                <div class="flex items-center">
+                    <input id="rememberMe" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700">
+                        Ingat saya
+                    </label>
+                </div>
                 <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
                     <i class="fas fa-sign-in-alt mr-2"></i>Masuk
                 </button>
@@ -209,12 +215,16 @@
                         <i class="fas fa-cog mr-3"></i>
                         Pengaturan
                     </a>
+                    <button onclick="logout()" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition duration-200 w-full text-left mt-2">
+                        <i class="fas fa-sign-out-alt mr-3"></i>
+                        Keluar
+                    </button>
                 </nav>
             </div>
             
-            <!-- User info and logout at bottom -->
+            <!-- User info at bottom -->
             <div class="p-6 border-t border-gray-700 mt-auto">
-                <div class="flex items-center mb-4">
+                <div class="flex items-center">
                     <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-user text-white"></i>
                     </div>
@@ -223,9 +233,6 @@
                         <p class="text-sm text-gray-400">Administrator</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Keluar
-                </button>
             </div>
         </div>
 
@@ -786,6 +793,34 @@
         function showLogin() {
             document.getElementById('loginPage').classList.remove('hidden');
             document.getElementById('registerPage').classList.add('hidden');
+            loadRememberedCredentials();
+        }
+
+        // Remember Me functionality
+        function saveCredentials(username, password, remember) {
+            if (remember) {
+                localStorage.setItem('rememberedUsername', username);
+                localStorage.setItem('rememberedPassword', password);
+                localStorage.setItem('rememberMe', 'true');
+            } else {
+                localStorage.removeItem('rememberedUsername');
+                localStorage.removeItem('rememberedPassword');
+                localStorage.removeItem('rememberMe');
+            }
+        }
+
+        function loadRememberedCredentials() {
+            const remembered = localStorage.getItem('rememberMe') === 'true';
+            if (remembered) {
+                const username = localStorage.getItem('rememberedUsername');
+                const password = localStorage.getItem('rememberedPassword');
+                
+                if (username && password) {
+                    document.getElementById('loginUsername').value = username;
+                    document.getElementById('loginPassword').value = password;
+                    document.getElementById('rememberMe').checked = true;
+                }
+            }
         }
 
         function showRegister() {
@@ -804,9 +839,13 @@
             
             const username = document.getElementById('loginUsername').value.toLowerCase();
             const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
 
             // Validate credentials
             if (userAccounts[username] && userAccounts[username].password === password) {
+                // Save or clear credentials based on remember me checkbox
+                saveCredentials(username, password, rememberMe);
+                
                 currentUser = {
                     username: username,
                     name: userAccounts[username].name,
@@ -1950,6 +1989,7 @@ ${bills.map((bill, index) =>
         document.addEventListener('DOMContentLoaded', function() {
             startTimeMonitoring();
             initializeMobileMenu();
+            loadRememberedCredentials();
         });
         
         // Start immediately if DOM is already loaded
@@ -1957,11 +1997,13 @@ ${bills.map((bill, index) =>
             document.addEventListener('DOMContentLoaded', function() {
                 startTimeMonitoring();
                 initializeMobileMenu();
+                loadRememberedCredentials();
             });
         } else {
             startTimeMonitoring();
             initializeMobileMenu();
+            loadRememberedCredentials();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a54e5f650efdf',t:'MTc2MTQ4NTY3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a657b728c3fd0',t:'MTc2MTQ4NjM1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
