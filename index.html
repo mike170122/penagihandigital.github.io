@@ -1075,6 +1075,7 @@
 
         function checkPermission(action) {
             const isAdmin = currentUser && currentUser.role === 'admin';
+            const isUser = currentUser && currentUser.role === 'user';
             
             switch(action) {
                 case 'delete':
@@ -1082,11 +1083,12 @@
                 case 'import':
                 case 'reports':
                 case 'settings':
-                    return isAdmin;
+                case 'user_management':
+                    return isAdmin; // Only admin can do these
                 case 'add':
                 case 'edit':
                 case 'view':
-                    return true; // Both admin and user can do these
+                    return isAdmin || isUser; // Both admin and user can do these
                 default:
                     return false;
             }
@@ -1262,14 +1264,33 @@
         }
 
         function showAddForm() {
+            // Check permission first
+            if (!checkPermission('add')) {
+                showToast('Anda tidak memiliki izin untuk menambah data', 'error');
+                return;
+            }
+            
             editingId = null;
             document.getElementById('formTitle').textContent = 'Tambah Tagihan';
             document.getElementById('billForm').reset();
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('billDate').value = today;
+            
             document.getElementById('formModal').classList.remove('hidden');
             document.getElementById('formModal').classList.add('flex');
+            
+            console.log('Add form opened, editingId:', editingId); // Debug log
         }
 
         function editBill(id) {
+            // Check permission first
+            if (!checkPermission('edit')) {
+                showToast('Anda tidak memiliki izin untuk mengedit data', 'error');
+                return;
+            }
+            
             const bill = bills.find(b => b.id === id);
             if (bill) {
                 editingId = id;
@@ -1296,13 +1317,19 @@
             const billToDelete = bills.find(b => b.id === id);
             if (billToDelete) {
                 showCustomConfirm(
-                    `Hapus tagihan petugas ${billToDelete.invoiceNumber}?`,
+                    `Hapus tagihan petugas ${billToDelete.invoiceNumber} untuk pelanggan ${billToDelete.customerName}?`,
                     () => {
+                        const originalLength = bills.length;
                         bills = bills.filter(b => b.id !== id);
-                        updateStats();
-                        renderTable();
-                        updateRecentActivity();
-                        showToast('Tagihan berhasil dihapus', 'success');
+                        
+                        if (bills.length < originalLength) {
+                            updateStats();
+                            renderTable();
+                            updateRecentActivity();
+                            showToast('Tagihan berhasil dihapus', 'success');
+                        } else {
+                            showToast('Gagal menghapus tagihan', 'error');
+                        }
                     }
                 );
             }
@@ -1316,30 +1343,60 @@
         function saveBill(event) {
             event.preventDefault();
             
+            // Validate form data
+            const invoiceNumber = document.getElementById('invoiceNumber').value.trim();
+            const customerName = document.getElementById('customerName').value.trim();
+            const billDate = document.getElementById('billDate').value;
+            const amount = document.getElementById('amount').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const status = document.getElementById('status').value;
+            
+            // Basic validation
+            if (!invoiceNumber || !customerName || !billDate || !amount) {
+                showToast('Semua field harus diisi!', 'error');
+                return;
+            }
+            
+            if (parseInt(amount) <= 0) {
+                showToast('Jumlah harus lebih dari 0!', 'error');
+                return;
+            }
+            
             const formData = {
-                invoiceNumber: document.getElementById('invoiceNumber').value,
-                customerName: document.getElementById('customerName').value,
-                date: document.getElementById('billDate').value,
-                amount: parseInt(document.getElementById('amount').value),
-                paymentMethod: document.getElementById('paymentMethod').value,
-                status: document.getElementById('status').value
+                invoiceNumber: invoiceNumber,
+                customerName: customerName,
+                date: billDate,
+                amount: parseInt(amount),
+                paymentMethod: paymentMethod,
+                status: status
             };
 
             if (editingId) {
                 // Update existing bill
                 const index = bills.findIndex(b => b.id === editingId);
-                bills[index] = { ...bills[index], ...formData };
-                showToast('Tagihan berhasil diperbarui', 'success');
+                if (index !== -1) {
+                    bills[index] = { ...bills[index], ...formData };
+                    showToast('Tagihan berhasil diperbarui', 'success');
+                    console.log('Updated bill:', bills[index]); // Debug log
+                } else {
+                    showToast('Data tidak ditemukan untuk diupdate', 'error');
+                    return;
+                }
             } else {
                 // Add new bill
                 const newBill = {
-                    id: Date.now(),
+                    id: Date.now() + Math.random(), // Ensure unique ID
                     ...formData
                 };
                 bills.push(newBill);
                 showToast('Tagihan berhasil ditambahkan', 'success');
+                console.log('Added new bill:', newBill); // Debug log
             }
 
+            // Reset editing state
+            editingId = null;
+            
+            // Update UI
             updateStats();
             renderTable();
             updateRecentActivity();
@@ -1869,16 +1926,36 @@ ${bills.map((bill, index) =>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Konfirmasi</h3>
                     <p class="text-gray-600 mb-6">${message}</p>
                     <div class="flex gap-3">
-                        <button onclick="this.closest('.fixed').remove(); (${onConfirm})()" class="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">
+                        <button id="confirmYes" class="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">
                             Ya, Hapus
                         </button>
-                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">
+                        <button id="confirmNo" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">
                             Batal
                         </button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
+            
+            // Add event listeners
+            const yesBtn = modal.querySelector('#confirmYes');
+            const noBtn = modal.querySelector('#confirmNo');
+            
+            yesBtn.addEventListener('click', () => {
+                modal.remove();
+                onConfirm();
+            });
+            
+            noBtn.addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
         }
 
         // Event listeners
@@ -1953,5 +2030,5 @@ ${bills.map((bill, index) =>
             loadRememberedCredentials();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a748965889fbc',t:'MTc2MTQ4Njk2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994a7f5de51aa3d3',t:'MTc2MTQ4NzQxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
